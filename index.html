@@ -456,8 +456,7 @@
       drawWheel();
     });
 
-    renderCategoryManager(););
-    }
+    renderCategoryManager();
 
     function pushHistory(cat){
       state.history.unshift({cat, time: Date.now()});
@@ -490,24 +489,28 @@
 
     // ====== RUNDY ======
     function startNewRound(){
-      const {name, word} = pickCategory();
-      state.category = name;
-      state.word = word;
-      pickedCategory.textContent = name;
-      pushHistory(name);
+      try {
+        const {name, word} = pickCategory();
+        state.category = name;
+        state.word = word;
+        pickedCategory.textContent = name;
+        pushHistory(name);
 
-      // Losuj szpiega
-      state.spy = randInt(1, state.players);
-      state.currentPlayer = 1;
-      curPlayer.textContent = '1';
+        // Losuj szpiega
+        state.spy = randInt(1, state.players);
+        state.currentPlayer = 1;
+        curPlayer.textContent = '1';
 
-      // Reset paneli
-      showPanel('reveal');
-      roleBox.textContent = 'Dotknij „Odsłoń”';
-      roleBox.classList.add('blurred');
-      el('#btnReveal').style.display = '';
-      el('#btnHide').style.display = 'none';
-      el('#spyReveal').style.display = 'none';
+        // Reset paneli
+        showPanel('reveal');
+        roleBox.textContent = 'Dotknij „Odsłoń”';
+        roleBox.classList.add('blurred');
+        el('#btnReveal').style.display = '';
+        el('#btnHide').style.display = 'none';
+        el('#spyReveal').style.display = 'none';
+      } catch (e) {
+        alert('Włącz co najmniej jedną kategorię, aby rozpocząć rundę.');
+      }
     }
 
     // Ujawnianie roli pojedynczemu graczowi
@@ -569,6 +572,24 @@
     const params = new URLSearchParams(location.search);
     const p = parseInt(params.get('gracze')||params.get('players')||'');
     if (!isNaN(p) && p>=1 && p<=10){ playersRange.value = p; playersRange.dispatchEvent(new Event('input')); }
+
+    // ====== PROSTE TESTY (konsola) ======
+    (function runTests(){
+      try {
+        console.group('Self-tests');
+        console.assert(typeof pickCategory === 'function', 'pickCategory should exist');
+        console.assert(typeof drawWheel === 'function', 'drawWheel should exist');
+        const total = Object.keys(categories).length;
+        console.assert(total > 0, 'There should be at least one category defined');
+        console.assert(enabledCategoryNames().length === enabledCats.size, 'enabledCategoryNames matches enabledCats size');
+        const countsText = (document.querySelector('#catCounts')?.textContent||'0/0').split('/');
+        const totalUI = parseInt(countsText[1]||'0',10);
+        console.assert(totalUI === total, 'UI total count equals categories total');
+        console.groupEnd();
+      } catch(e){
+        console.error('Self-tests failed', e);
+      }
+    })();
   </script>
 </body>
 </html>
